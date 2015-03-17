@@ -1,0 +1,11 @@
+# Vagrant Template used for Vagrantfile creation specific to CVE
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "BOX_NAME"
+
+  config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  config.vm.synced_folder "HOST_SHARED_DIR" , "GUEST_MOUNT_DIR"
+
+  config.vm.provision "shell", path: "provision.sh" 
+end
