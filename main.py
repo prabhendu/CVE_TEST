@@ -13,7 +13,7 @@ import shutil
 from subprocess import call
 
 if len(sys.argv)!=2:
-	print 'please enter absolute exploit file name'
+	print 'please enter absolute exploit list file name'
 	print 'usage : python main.py <filename> \nExiting'
 	sys.exit(1)
 
@@ -24,11 +24,14 @@ for list in sys.argv:
 boxname = raw_input('Please enter the name of box :')
 syncfolder = raw_input('Please enter absolute host shared folder name :')
 shared_dir = '/vagrant_data'  #local shared dir
-local_file = syncfolder +'/exploit.c' #local exploit copy name
 
 # Copying exploit program 
 print('Copying exploit program in local directory')
-shutil.copy2(sys.argv[1],local_file)
+exploit_file = open(sys.argv[1],'r')
+i=1
+for line in exploit_file:
+	shutil.copy2(line.replace("\n",""),syncfolder+'/exploit'+str(i)+'.c')
+	i=i+1
 
 call(["rm","-f","Vagrantfile"])
 print('Initializing Vagrant\n')
