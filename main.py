@@ -1,4 +1,4 @@
-# Main program :
+# Main program ource
 # Vagrantfile creation using a generic template
 # Shell provisioning method used
 # Pass absolute file name of exploit program to be run as initial argument
@@ -23,6 +23,7 @@ for list in sys.argv:
 
 boxname = raw_input('Please enter the name of box :')
 syncfolder = raw_input('Please enter absolute host shared folder name :')
+memory = raw_input('Please enter the memory required :')
 shared_dir = '/vagrant_data'  #local shared dir
 
 # Copying exploit program 
@@ -39,7 +40,7 @@ print('Initializing Vagrant\n')
 vagrant_template = open(syncfolder+'/Vagrantfile','r') #common template
 vagrant_file = open(os.getcwd()+'/Vagrantfile','w') #final actual file
 
-replacements = {'BOX_NAME':boxname , 'HOST_SHARED_DIR':syncfolder , 'GUEST_MOUNT_DIR':shared_dir}
+replacements = {'BOX_NAME':boxname , 'HOST_SHARED_DIR':syncfolder , 'GUEST_MOUNT_DIR':shared_dir , 'MEMORY':memory}
 
 for line in vagrant_template:
 	for src,dest in replacements.iteritems():
@@ -50,11 +51,40 @@ vagrant_template.close()
 vagrant_file.close()
 #Modifying Vagrantfile ends  
 
-#Creating provisioning file
-provision_list=raw_input('Please enter list of inorder packages you want in VM: ')
-prov_file = open(os.getcwd()+'/provision.sh','w')
+#puppet modules to be installed
+#ensure that puppet is installed on Host
+puppet_mod_install = open ('puppet.sh','w')
 
+kernel_deb_dir=raw_input('enter the location of new kernel source(deb files) you want to build:\n ')
+puppet_mod_install.write('cp ' + kernel_deb_dir + '/* ' + syncfolder +'\n')
+
+puppet_list = raw_input('Please enter the puppet modules you want in order\n')
+for module in puppet_list.split():
+        puppet_mod_install.write('puppet module install --force --modulepath ' + os.getcwd() + '/puppet/modules ' + module + '\n' )
+puppet_mod_install.close()
+#Download puppet modules
+os.chmod("./puppet.sh",0755)
+call("./puppet.sh",shell=True)
+
+#Creating provisioning file
+package_list=raw_input('Please enter list of inorder packages you want in VM: ')
+prov_file = open(os.getcwd()+'/provision.sh','w')
 prov_file.write('#!/usr/bin/env bash\n')
-for package in provision_list.split():
+prov_file.write('#update the server\n')
+prov_file.write('sudo apt-get update \n')
+prov_file.write('sudo apt-get -y upgrade \n')
+prov_file.write('sudo apt-get -y install dkms build-essential linux-headers-generic vim gcc\n')
+
+for package in package_list.split():
 	prov_file.write('sudo apt-get install -y ' + package + '\n')
+
+#Coying all files from shared directory.Kernel rebuild destroys shared directory
+prov_file.write('sudo mkdir /temp')
+prov_file.write('sudo cp ' + shared_dir +'/* /temp \n' )
+if kernel_deb_dir != '':
+	prov_file.write('sudo dpkg -i *.deb\n')
+
 prov_file.close();
+
+#Creating default.pp with required classes
+print 'Please ensure default.pp is correct'
