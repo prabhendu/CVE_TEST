@@ -69,6 +69,9 @@ if kernel_deb_dir != '':
 	puppet_mod_install.write('cp ' + kernel_deb_dir + '/*.deb ' + syncfolder +'\n')
 
 num = raw_input('How many puppet modules you want to install : ')
+if not num.isdigit():
+	print('Defaulting to zero ')
+	num=0
 for i in range(int(num)):
 	j=0
 	x=raw_input('Enter the module-name and version if any : ')
@@ -80,9 +83,9 @@ for i in range(int(num)):
 			version = ''
 			j=j+1
 	if version != '':
-		puppet_mod_install.write('puppet module install --modulepath ' + os.getcwd() + '/puppet/modules ' + module_name + ' --version ' + '\"<=' + version + '\"' +'\n' )
+		puppet_mod_install.write('puppet module list --modulepath ' + os.getcwd() + '/puppet/modules | grep -w '+ module_name + ' || ' +'puppet module install --modulepath ' + os.getcwd() + '/puppet/modules ' + module_name + ' --version ' + '\"<=' + version + '\"' +'\n' )
 	else:
-		puppet_mod_install.write('puppet module install --modulepath ' + os.getcwd() + '/puppet/modules ' + module_name +'\n' )
+		puppet_mod_install.write('puppet module list --modulepath ' + os.getcwd() + '/puppet/modules | grep -w '+ module_name + ' || ' + 'puppet module install --modulepath ' + os.getcwd() + '/puppet/modules ' + module_name +'\n' )
 
 #puppet_list = raw_input('Please enter the puppet modules you want in order\n')
 #for module in puppet_list.split():
@@ -97,8 +100,8 @@ prov_file = open(os.getcwd()+'/provision.sh','w')
 prov_file.write('#!/usr/bin/env bash\n')
 prov_file.write('#update the server\n')
 prov_file.write('sudo apt-get update \n')
-prov_file.write('sudo apt-get -y upgrade \n')
-prov_file.write('sudo apt-get -y install dkms build-essential linux-headers-generic vim gcc git puppet-common\n')
+#prov_file.write('sudo apt-get -y upgrade \n')
+prov_file.write('sudo apt-get -y install dkms build-essential linux-headers-generic vim gcc puppet*\n')
 
 package_list=raw_input('Please enter list of sudo packages you want in VM : ')
 for package in package_list.split():
