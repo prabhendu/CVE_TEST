@@ -10,4 +10,5 @@ python main.py exploit_list
 
 -returns a Vagrantfile and provision.sh for VM.
 
--"vagrant up" required to start VM
+-Starts VM using from script and executes binaries provided in the exploit_list on the VM
+
