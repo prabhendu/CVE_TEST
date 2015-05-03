@@ -6,7 +6,7 @@ Shell provisioning is used to install dependencies using apt-get
 
 Usage:
 
-python main.py <exploit>
+python main.py exploit_list
 
 -returns a Vagrantfile and provision.sh for VM.
 
